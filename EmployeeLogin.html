@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Login - Vanderbuild</title>
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='VanderBuild_Logo.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(lch(50.66% 4.53 185.4 / 0.65), rgba(16, 22, 20, 0.75)),
+                        url("{{ url_for('static', filename='bglog.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Loading Skeleton */
+        .block-skeleton {
+            background: #e2e8f0; 
+            background: linear-gradient(110deg, #e2e8f0 8%, #cbd5e0 18%, #e2e8f0 33%);
+            background-size: 200% 100%;
+            animation: construct-shimmer 1.5s infinite linear;
+            border: 1px solid #cbd5e0; 
+            border-radius: 12px;
+            height: 420px;
+            width: 420px;
+        }
+
+        @keyframes construct-shimmer { to { background-position-x: -200%; } }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 20px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding-left: 45px;
+            height: 45px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 1px solid #d1d5db;
+        }
+
+        .input-group-text {
+            background: transparent;
+            border: none;
+            position: absolute;
+            z-index: 10;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            padding-left: 15px;
+            color: #6b7280;
+        }
+
+        .input-wrapper { position: relative; margin-bottom: 20px; }
+
+        .btn-login {
+            background: #006F53;
+            color: white;
+            border-radius: 12px;
+            height: 45px;
+            font-weight: 500;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .btn-login:hover { background: #004d3a; color: white; }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6b7280;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader" class="block-skeleton"></div>
+
+    <div id="login-content" class="login-card text-center" style="display: none;">
+        <h1 style="font-family: serif; font-weight: bold; display:flex; align-items:center; justify-content:center;">
+            <img src="{{ url_for('static', filename='VanderBuild_Logo.png') }}" style="height: 60px; margin-right: -14px;">
+            <span style="color:#006F53;">ander</span>
+            <span style="color:#800000;">Build</span>
+        </h1>
+        <h6 style="font-family: serif;"><b>RE HOLDING CORP.</b></h6>
+        <p style="font-family: serif; color: gray; font-size: 0.8rem; margin-bottom: 20px;">EMPLOYEE PORTAL</p>
+
+        <form action="/login" method="POST" id="loginForm">
+            <input type="hidden" name="user_type" value="employee">
+
+            <div class="input-wrapper">
+                 <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                    <input type="text" name="employee_id" class="form-control" 
+                    placeholder="Employee ID" 
+                    pattern="[A-Za-z0-9]+" 
+                    title="ID must contain only letters and numbers"
+                     required>
+            </div>
+
+            <div class="input-wrapper">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" name="password" id="employeePassword" class="form-control" placeholder="••••••••" required>
+                <span class="toggle-password" onclick="toggleEmployeePassword()">
+                    <i class="fas fa-eye" id="employeeToggleIcon"></i>
+                </span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3" style="font-size: 14px; color: #4b5563;">
+                <div><input type="checkbox" name="remember"> Remember me</div>
+                <a href="#" style="color: #006F53; text-decoration: none; font-weight: 500;">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100" id="loginBtn">
+                <span id="btnText">Employee Log In</span>
+                <span id="btnSpinner" class="spinner-border spinner-border-sm d-none"></span>
+            </button>
+        </form>
+
+        <div class="mt-3">
+            <a href="{{ url_for('admin_home') }}" style="color: #1d1d1d; text-decoration: none; font-weight: 600;">
+                Press for Admin Login
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Reveal content
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                const content = document.getElementById('login-content');
+                content.style.display = 'block';
+                content.classList.add('animate__animated', 'animate__zoomIn');
+            }, 1200); 
+        });
+
+        // Password Toggle
+        function toggleEmployeePassword() {
+            const passwordField = document.getElementById("employeePassword");
+            const toggleIcon = document.getElementById("employeeToggleIcon");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleIcon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                toggleIcon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
+        // Form Submit
+        document.getElementById('loginForm').onsubmit = function() {
+            document.getElementById('btnText').innerText = "Authenticating...";
+            document.getElementById('btnSpinner').classList.remove('d-none');
+            document.getElementById('loginBtn').disabled = true;
+        };
+    </script>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let iconType = 'error';
+                let titleText = 'Access Denied';
+
+                if ("{{ category }}" === "success" || "{{ category }}" === "info") {
+                    iconType = 'success';
+                    titleText = 'Logged Out';
+                }
+
+                Swal.fire({
+                    icon: iconType,
+                    title: titleText,
+                    text: "{{ message }}",
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            });
+          </script>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

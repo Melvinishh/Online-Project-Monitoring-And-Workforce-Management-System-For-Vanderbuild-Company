@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Payroll - Vanderbuild</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --vander-green: #004d40;
+            --vander-mint: #00897b;
+            --vander-mint-light: #e8f5e9;
+            --vander-bg: #f4f6f9;
+            --vander-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        /* Prevent scrolling by locking height to 100% of the screen */
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            background: var(--vander-bg);
+        }
+
+        /* --- SIDEBAR (Restored Functions) --- */
+        .sidebar {
+            height: 100vh;
+            width: 260px;
+            position: fixed;
+            background: var(--vander-green);
+            padding: 20px;
+            color: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            animation: slideInLeft 0.6s ease-out forwards;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .sidebar h5 {
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            padding-left: 10px;
+        }
+
+        .sidebar-nav { flex-grow: 1; }
+
+        .sidebar a {
+            display: block;
+            color: #cbd5e1;
+            padding: 12px 15px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .sidebar a i { width: 20px; margin-right: 15px; }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .logout-link { margin-top: auto; margin-bottom: 20px; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: 260px;
+            padding: 15px 30px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Compacted Header */
+        .top-banner-green {
+            background: linear-gradient(to right, var(--vander-green), var(--vander-mint));
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 77, 64, 0.2);
+        }
+        .top-banner-green h3 { font-size: 1.8rem; margin: 0; font-weight: 700; }
+
+        /* Compacted Summary Cards */
+        .summary-container { display: flex; gap: 15px; margin-bottom: 10px; }
+        .summary-card {
+            background: white; flex: 1; padding: 12px 20px; border-radius: 10px;
+            border-left: 5px solid var(--vander-mint);
+            box-shadow: var(--vander-shadow);
+        }
+        .summary-card.net-pay { background: var(--vander-mint); color: white; border-left: none; }
+        .summary-label { font-size: 0.85rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        .summary-card.net-pay .summary-label { color: rgba(255,255,255,0.8); }
+        .summary-value { font-size: 1.6rem; font-weight: 700; }
+
+        /* THE PAYSLIP CARD */
+        .payslip-card {
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--vander-shadow);
+            border-top: 5px solid var(--vander-mint);
+        }
+
+        .payslip-header {
+            background: #f8fafc; color: var(--vander-green);
+            padding: 10px 25px; font-weight: 700; font-size: 1.2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-title {
+            background: var(--vander-mint-light); padding: 6px 25px;
+            font-size: 0.9rem; font-weight: 800; color: var(--vander-mint);
+            text-transform: uppercase;
+        }
+
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table td {
+            padding: 8px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1.2rem;
+            color: #334155;
+        }
+        .data-table td:last-child { text-align: right; font-weight: 700; }
+
+        .deduction-text { color: #dc3545; }
+        
+        /* THE BIG FINALE */
+        .net-row { background: #f8fafc; }
+        .net-row td {
+            font-size: 1.8rem !important;
+            font-weight: 900 !important;
+            padding: 12px 25px !important;
+        }
+
+        .download-btn {
+            background: white; color: var(--vander-green); border: none;
+            padding: 8px 20px; border-radius: 8px; font-weight: 600;
+            transition: 0.3s;
+        }
+        .download-btn:hover { background: var(--vander-mint-light); transform: translateY(-2px); }
+
+    .footer-note {
+    font-size: 1.1rem; 
+    margin-top: auto; 
+    padding: 15px 0;
+    color: #64748b;
+    text-align: center; 
+    width: 100%;
+    font-weight: 500;
+    border-top: 1px solid #e2e8f0; 
+}
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h5>Vanderbuild Company</h5>
+    <div class="sidebar-nav">
+        <a href="{{ url_for('employee_dashboard') }}"><i class="fas fa-th-large"></i>Dashboard</a>
+        <a href="#"><i class="fas fa-history"></i>Time & Attendance</a>
+        <a href="#"><i class="fas fa-calendar-alt"></i>Calendar</a>
+        <a href="{{ url_for('leave_management') }}"><i class="fas fa-file-alt"></i>Leave Management</a>
+        <a href="{{ url_for('mypayroll') }}" class="active"><i class="fas fa-wallet"></i>My Payroll</a>
+        <a href="{{ url_for('myprofile') }}"><i class="fas fa-user-circle"></i>My Profile</a>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</div>
+
+<div class="main-content">
+    <div class="top-banner-green">
+        <div>
+            <h3>My Payroll</h3>
+            <small class="opacity-75">Earnings breakdown for current period</small>
+        </div>
+        <button class="download-btn"><i class="fas fa-download me-2"></i>Download PDF</button>
+    </div>
+
+    <div class="summary-container">
+        <div class="summary-card">
+            <div class="summary-label">Gross Earnings</div>
+            <div class="summary-value" style="color: var(--vander-green);">₱{{ "{:,.2f}".format(employee['Basic_Pay'] | float) }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-label">Total Deductions</div>
+            <div class="summary-value text-danger">₱{{ total_deductions }}</div>
+        </div>
+        <div class="summary-card net-pay">
+            <div class="summary-label">Net Take-Home</div>
+            <div class="summary-value">₱{{ after_tax }}</div>
+        </div>
+    </div>
+
+    <div class="payslip-card">
+        <div class="payslip-header">Payslip: March 1-15, 2026</div>
+        
+        <div class="section-title">Earnings Breakdown</div>
+        <table class="data-table">
+            <tr><td>Basic Salary</td><td>₱{{ "{:,.2f}".format(employee['Basic_Pay'] | float) }}</td></tr>
+            <tr><td>Overtime Pay</td><td>₱0.00</td></tr>
+            <tr><td>Allowances</td><td>₱0.00</td></tr>
+        </table>
+
+        <div class="section-title">Statutory Deductions</div>
+        <table class="data-table">
+            <tr><td>SSS Contribution (4.5%)</td><td class="deduction-text">- ₱{{ sss_val }}</td></tr>
+            <tr><td>PhilHealth (9.5%)</td><td class="deduction-text">- ₱{{ phil_val }}</td></tr>
+            <tr><td>Pag-IBIG (4.5%)</td><td class="deduction-text">- ₱{{ pag_val }}</td></tr>
+        </table>
+
+        <div class="section-title">Final Summary</div>
+        <table class="data-table">
+            <tr><td>Total Deductions</td><td class="deduction-text fw-bold">- ₱{{ total_deductions }}</td></tr>
+            <tr class="net-row">
+                <td style="color: var(--vander-green);">NET PAYABLE</td>
+                <td style="color: var(--vander-green);">₱{{ after_tax }}</td>
+            </tr>
+        </table>
+    </div>
+
+   <p class="footer-note">
+        <i class="fas fa-info-circle me-1"></i> Subject to adjustment for attendance discrepancies.
+    </p>
+</div>
+
+</body>
+</html>
